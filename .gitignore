@@ -1,0 +1,29 @@
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+
+# GenLayer / gltest
+artifacts/
+.cache/
+
+# Env files (never commit real secrets/addresses you don't want public)
+.env
+.env.local
+!.env.example
+
+# OS / editor
+.DS_Store
+*.swp
+.vscode/
+.idea/

@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-void text-ink-primary font-body antialiased;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 0
+    );
+    background-size: 14px 14px;
+  }
+
+  ::selection {
+    background: rgba(47, 182, 166, 0.3);
+  }
+
+  :focus-visible {
+    outline: 2px solid #2fb6a6;
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-widest2 text-ink-muted;
+  }
+
+  .hairline {
+    @apply border border-hairline;
+  }
+
+  .ticket-edge {
+    border-image: repeating-linear-gradient(
+        to right,
+        #232a35 0,
+        #232a35 6px,
+        transparent 6px,
+        transparent 12px
+      )
+      1;
+    border-bottom-width: 2px;
+    border-bottom-style: solid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

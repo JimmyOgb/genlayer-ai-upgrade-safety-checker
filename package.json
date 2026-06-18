@@ -1,0 +1,17 @@
+{
+  "name": "ai-upgrade-safety-checker",
+  "type": "module",
+  "private": true,
+  "description": "GenLayer Intelligent Contract + dashboard that runs a decentralized AI-consensus safety audit on a smart contract upgrade before it ships.",
+  "workspaces": ["frontend"],
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "lint": "cd frontend && npm run lint",
+    "deploy": "genlayer deploy"
+  },
+  "devDependencies": {
+    "genlayer-js": "^1.1.8"
+  }
+}

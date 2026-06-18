@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: tests requiring a live GenLayer network (run with: gltest tests/integration -v -s)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint.per-file-ignores]
+# `from genlayer import *` is the required, documented pattern for every
+# GenLayer Intelligent Contract — gl.Contract, gl.public.*, gl.nondet.*, etc.
+# all come from this wildcard. F403/F405 are expected here, not a smell.
+"contracts/*.py" = ["F403", "F405"]

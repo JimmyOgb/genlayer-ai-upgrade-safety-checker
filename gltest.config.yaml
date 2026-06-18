@@ -1,0 +1,16 @@
+networks:
+  default: studionet
+
+  # Hosted GenLayer Studio — same network the live dashboard talks to.
+  studionet: {}
+
+  # Local `genlayer up` simulator.
+  localnet:
+    url: "http://127.0.0.1:4000/api"
+
+  testnet_asimov: {}
+
+paths:
+  contracts: "contracts"
+
+environment: .env

@@ -1,0 +1,12 @@
+# Off-chain GenLayer client SDK + the gltest direct/integration test runner.
+# Pinned tags, matching what this repo was built and tested against.
+genlayer-py @ git+https://github.com/genlayerlabs/genlayer-py@v0.18
+genlayer-test @ git+https://github.com/genlayerlabs/genlayer-testing-suite@v0.29
+
+# Linter for GenLayer Intelligent Contracts (catches GenVM-specific issues
+# that a generic Python linter won't, e.g. storage outside __init__).
+genvm-linter @ git+https://github.com/genlayerlabs/genvm-linter@main
+
+requests>=2.31.0
+python-dotenv>=1.0.1
+ruff>=0.7.0
