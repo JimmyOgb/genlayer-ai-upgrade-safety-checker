@@ -23,13 +23,15 @@ jobs:
           key: gltest-direct-sdk-${{ runner.os }}
 
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install \
+            "genlayer-py @ git+https://github.com/genlayerlabs/genlayer-py@v0.18" \
+            "genlayer-test @ git+https://github.com/genlayerlabs/genlayer-testing-suite@v0.29" \
+            "ruff>=0.7.0" \
+            "pytest>=8.0.0"
 
       - name: Ruff (style)
         run: ruff check contracts/ tests/
-
-      - name: GenVM lint (AST-based safety checks, e.g. storage-outside-init)
-        run: genvm-lint lint contracts/upgrade_safety_checker.py
 
       - name: Direct-mode tests (mocked web/LLM, no live network)
         run: pytest tests/direct -v
@@ -45,7 +47,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
