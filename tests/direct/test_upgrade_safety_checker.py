@@ -1,16 +1,7 @@
 """
-Direct-mode tests for UpgradeSafetyChecker — run in-process against the real
-contract file, with the IPFS fetch and LLM call mocked via gltest's
-Foundry-style cheatcodes. No Docker, no live network, no LLM spend.
-
-Run with:
-    pytest tests/direct -v
-
-First run downloads the matching GenVM Python SDK (cached afterwards in
-~/.cache/gltest-direct) — see the root README's "Testing" section.
+Direct-mode tests for UpgradeSafetyChecker.
+Run with: pytest tests/direct -v
 """
-
-import json
 
 import pytest
 
@@ -19,19 +10,9 @@ from tests.direct.conftest import (
     NEW_CID,
     OLD_CID,
     ORACLE_PROMPT_PATTERN,
+    llm_response,
     mock_oracle_sources,
 )
-
-
-def _llm_response(**overrides) -> str:
-    payload = {
-        "security_decreased": False,
-        "risk_level": "LOW",
-        "storage_collision_detected": False,
-        "findings": [],
-    }
-    payload.update(overrides)
-    return json.dumps(payload)
 
 
 class TestInitialState:
@@ -52,11 +33,9 @@ class TestInitialState:
 
 
 class TestApprovalLogic:
-    """Exercises is_approved = not security_decreased and risk_level not in (HIGH, CRITICAL)."""
-
     def test_safe_upgrade_is_approved(self, direct_vm, direct_deploy):
         mock_oracle_sources(direct_vm)
-        direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, _llm_response())
+        direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, llm_response())
         contract = direct_deploy(CONTRACT_PATH)
 
         contract.run_audit(OLD_CID, NEW_CID)
@@ -72,9 +51,7 @@ class TestApprovalLogic:
         self, direct_vm, direct_deploy
     ):
         mock_oracle_sources(direct_vm)
-        direct_vm.mock_llm(
-            ORACLE_PROMPT_PATTERN, _llm_response(risk_level="MEDIUM")
-        )
+        direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, llm_response(risk_level="MEDIUM"))
         contract = direct_deploy(CONTRACT_PATH)
 
         contract.run_audit(OLD_CID, NEW_CID)
@@ -86,9 +63,7 @@ class TestApprovalLogic:
         self, direct_vm, direct_deploy, risk_level
     ):
         mock_oracle_sources(direct_vm)
-        direct_vm.mock_llm(
-            ORACLE_PROMPT_PATTERN, _llm_response(risk_level=risk_level)
-        )
+        direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, llm_response(risk_level=risk_level))
         contract = direct_deploy(CONTRACT_PATH)
 
         contract.run_audit(OLD_CID, NEW_CID)
@@ -98,12 +73,10 @@ class TestApprovalLogic:
     def test_security_decreased_rejects_even_at_low_risk(
         self, direct_vm, direct_deploy
     ):
-        """A model can flag a regression without escalating risk_level —
-        security_decreased alone must be enough to block approval."""
         mock_oracle_sources(direct_vm)
         direct_vm.mock_llm(
             ORACLE_PROMPT_PATTERN,
-            _llm_response(security_decreased=True, risk_level="LOW"),
+            llm_response(security_decreased=True, risk_level="LOW"),
         )
         contract = direct_deploy(CONTRACT_PATH)
 
@@ -117,7 +90,7 @@ class TestApprovalLogic:
         mock_oracle_sources(direct_vm)
         direct_vm.mock_llm(
             ORACLE_PROMPT_PATTERN,
-            _llm_response(storage_collision_detected=True, risk_level="HIGH"),
+            llm_response(storage_collision_detected=True, risk_level="HIGH"),
         )
         contract = direct_deploy(CONTRACT_PATH)
 
@@ -137,9 +110,7 @@ class TestFindings:
         mock_oracle_sources(direct_vm)
         direct_vm.mock_llm(
             ORACLE_PROMPT_PATTERN,
-            _llm_response(
-                security_decreased=True, risk_level="HIGH", findings=findings
-            ),
+            llm_response(security_decreased=True, risk_level="HIGH", findings=findings),
         )
         contract = direct_deploy(CONTRACT_PATH)
 
@@ -149,12 +120,9 @@ class TestFindings:
 
 
 class TestResponseParsing:
-    """run_audit() strips ```json fences before json.loads — verify both forms."""
-
     def test_markdown_fenced_response_is_parsed(self, direct_vm, direct_deploy):
         mock_oracle_sources(direct_vm)
-        fenced = "```json\n" + _llm_response(risk_level="NONE") + "\n```"
-        direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, fenced)
+        direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, llm_response(risk_level="NONE"))
         contract = direct_deploy(CONTRACT_PATH)
 
         contract.run_audit(OLD_CID, NEW_CID)
@@ -164,8 +132,6 @@ class TestResponseParsing:
     def test_missing_fields_fall_back_to_safe_defaults(
         self, direct_vm, direct_deploy
     ):
-        """An empty/garbled-but-valid JSON object must fail closed:
-        security_decreased→True, risk_level→"CRITICAL", i.e. NOT approved."""
         mock_oracle_sources(direct_vm)
         direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, "{}")
         contract = direct_deploy(CONTRACT_PATH)
@@ -181,7 +147,7 @@ class TestResponseParsing:
 class TestOneShotGate:
     def test_cannot_audit_the_same_deployment_twice(self, direct_vm, direct_deploy):
         mock_oracle_sources(direct_vm)
-        direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, _llm_response())
+        direct_vm.mock_llm(ORACLE_PROMPT_PATTERN, llm_response())
         contract = direct_deploy(CONTRACT_PATH)
 
         contract.run_audit(OLD_CID, NEW_CID)
